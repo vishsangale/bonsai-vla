@@ -4,7 +4,7 @@ import numpy as np
 class PatchificationScene(Scene):
     def construct(self):
         # 1. Load and display input image
-        image = ImageMobject("visualizations/assets/cifar_sample.png")
+        image = ImageMobject("visualizations/assets/cifar_deer.png")
         image.height = 4
         image.to_edge(LEFT, buff=1)
         
@@ -21,13 +21,10 @@ class PatchificationScene(Scene):
         patches = Group()
         for i in range(grid_size):
             for j in range(grid_size):
-                # Manim's ImageMobject has a pixel-based cropping or we can use multiple ImageMobjects
-                # A robust way is to use the same image and set display_pixel_coords
-                p = ImageMobject("visualizations/assets/cifar_sample.png")
+                p = ImageMobject("visualizations/assets/cifar_deer.png")
                 p.height = patch_height
                 
-                # Calculate pixel coordinates for cropping (CIFAR image is 512x512 now)
-                # PIL (0,0) is top-left.
+                # Calculate pixel coordinates for cropping (512x512)
                 pixel_w = 512 // grid_size
                 pixel_h = 512 // grid_size
                 left = j * pixel_w
@@ -35,7 +32,7 @@ class PatchificationScene(Scene):
                 right = left + pixel_w
                 bottom = top + pixel_h
                 
-                # Crop the underlying numpy array
+                # Crop
                 p.pixel_array = p.pixel_array[top:bottom, left:right]
                 
                 # Position relative to top-left of image
@@ -51,19 +48,18 @@ class PatchificationScene(Scene):
         self.play(Create(outlines))
         self.wait()
 
-        # 3. Animate patches moving and FLATTENING to sequence
+        # 3. Animate patches moving and FLATTENING to a VERTICAL sequence
         sequence = Group()
         for i, p in enumerate(patches):
             # Target position in a sequence
             target = p.copy()
             
-            # Non-uniform scaling to simulate flattening into a 1D vector
-            # We make it very thin (width=0.2) but keep some height (height=2.0)
-            target.stretch_to_fit_width(0.15)
-            target.stretch_to_fit_height(2.0)
+            # Non-uniform scaling to simulate flattening into a 1D vector (horizontal line)
+            target.stretch_to_fit_width(2.5)
+            target.stretch_to_fit_height(0.12)
             
-            # Arrange in a single horizontal row
-            target.move_to(LEFT * 4 + RIGHT * i * 0.4 + DOWN * 1)
+            # Arrange in a vertical stack on the right
+            target.move_to(RIGHT * 3 + UP * 2.5 + DOWN * i * 0.35)
             sequence.add(target)
 
         # Transformation animation
@@ -79,7 +75,7 @@ class PatchificationScene(Scene):
 
         # Group sequence for easier labeling
         seq_rect = SurroundingRectangle(sequence, color=BLUE, buff=0.2)
-        seq_label = Text("Flattened Patch Embeddings (Sequence of 1D Vectors)", font_size=24).next_to(seq_rect, UP)
+        seq_label = Text("Sequence of\nFlattened Vectors", font_size=20).next_to(seq_rect, RIGHT)
         
         self.play(Create(seq_rect), Write(seq_label))
         self.wait(3)
