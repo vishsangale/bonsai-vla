@@ -2,3 +2,5 @@ name: "mnist"
 path: "./data"
 image_size: 28
 channels: 1
+mean: [0.1307]
+std: [0.3081]
