@@ -1,5 +1,5 @@
 name: "mnist"
-path: "./data"
+path: "${hydra:runtime.cwd}/data"
 image_size: 28
 channels: 1
 mean: [0.1307]

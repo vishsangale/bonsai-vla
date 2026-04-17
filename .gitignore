@@ -1,11 +1,9 @@
 # Data
 data/
 
-# Checkpoints
-checkpoints/
-
-# TensorBoard logs
-runs/
+# Experiment outputs (logs, checkpoints, hydra configs)
+experiments/
+outputs/
 
 # Python
 __pycache__/
@@ -23,8 +21,7 @@ build/
 venv/
 env/
 
-# Hydra outputs
-outputs/
+# Hydra specific
 multirun/
 .hydra/
 
