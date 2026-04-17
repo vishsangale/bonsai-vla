@@ -13,50 +13,76 @@ class PatchificationScene(Scene):
         self.wait()
 
         # 2. Create grid of patches
-        grid_size = 4 # 4x4 grid for CIFAR-10
+        grid_size = 4 # 4x4 grid
         patch_width = image.width / grid_size
         patch_height = image.height / grid_size
         
-        patches = VGroup()
+        # Create actual image patches using crop
+        patches = Group()
         for i in range(grid_size):
             for j in range(grid_size):
-                p = Square(side_length=patch_width)
-                p.set_stroke(WHITE, opacity=0.5)
+                # Manim's ImageMobject has a pixel-based cropping or we can use multiple ImageMobjects
+                # A robust way is to use the same image and set display_pixel_coords
+                p = ImageMobject("visualizations/assets/cifar_sample.png")
+                p.height = patch_height
+                
+                # Calculate pixel coordinates for cropping (CIFAR image is 512x512 now)
+                # PIL (0,0) is top-left.
+                pixel_w = 512 // grid_size
+                pixel_h = 512 // grid_size
+                left = j * pixel_w
+                top = i * pixel_h
+                right = left + pixel_w
+                bottom = top + pixel_h
+                
+                # Crop the underlying numpy array
+                p.pixel_array = p.pixel_array[top:bottom, left:right]
+                
                 # Position relative to top-left of image
                 p.move_to(image.get_corner(UL) + np.array([j*patch_width + patch_width/2, -i*patch_height - patch_height/2, 0]))
                 patches.add(p)
         
-        self.play(Create(patches))
+        # Create outlines
+        outlines = VGroup(*[
+            Square(side_length=patch_width).move_to(p.get_center()).set_stroke(WHITE, opacity=0.3)
+            for p in patches
+        ])
+        
+        self.play(Create(outlines))
         self.wait()
 
-        # 3. Animate patches lifting and flattening
-        sequence = VGroup()
+        # 3. Animate patches moving and FLATTENING to sequence
+        sequence = Group()
         for i, p in enumerate(patches):
-            # Create a colored square representing the patch embedding
-            embedded_patch = Square(side_length=0.4)
-            embedded_patch.set_fill(BLUE, opacity=0.8)
-            embedded_patch.set_stroke(WHITE, width=1)
+            # Target position in a sequence
+            target = p.copy()
             
-            # Position them in a row
-            embedded_patch.move_to(RIGHT * 2 + UP * 2.5 + DOWN * (i * 0.45 if i < 16 else 0))
-            if i >= 16: # Adjust for layout if many patches
-                embedded_patch.move_to(RIGHT * 3 + UP * 2.5 + DOWN * ((i-16) * 0.45))
+            # Non-uniform scaling to simulate flattening into a 1D vector
+            # We make it very thin (width=0.2) but keep some height (height=2.0)
+            target.stretch_to_fit_width(0.15)
+            target.stretch_to_fit_height(2.0)
             
-            sequence.add(embedded_patch)
+            # Arrange in a single horizontal row
+            target.move_to(LEFT * 4 + RIGHT * i * 0.4 + DOWN * 1)
+            sequence.add(target)
 
-        # Simplify to show just first few and then the rest
+        # Transformation animation
         self.play(
             LaggedStart(
-                *[TransformFromCopy(patches[i], sequence[i]) for i in range(len(patches))],
-                lag_ratio=0.05
-            )
+                *[Transform(patches[i], sequence[i]) for i in range(len(patches))],
+                lag_ratio=0.1
+            ),
+            image.animate.set_opacity(0.1),
+            FadeOut(outlines)
         )
         self.wait()
 
-        # Label the sequence
-        seq_label = Text("Flattened Patches (Sequence)", font_size=24).next_to(sequence, RIGHT)
-        self.play(Write(seq_label))
-        self.wait(2)
+        # Group sequence for easier labeling
+        seq_rect = SurroundingRectangle(sequence, color=BLUE, buff=0.2)
+        seq_label = Text("Flattened Patch Embeddings (Sequence of 1D Vectors)", font_size=24).next_to(seq_rect, UP)
+        
+        self.play(Create(seq_rect), Write(seq_label))
+        self.wait(3)
 
 class TransformerBlockScene(Scene):
     def construct(self):
