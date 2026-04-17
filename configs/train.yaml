@@ -1,0 +1,9 @@
+defaults:
+  - model: vit
+  - dataset: mnist
+  - _self_
+
+training:
+  epochs: 5
+  batch_size: 64
+  learning_rate: 3e-4
