@@ -1,23 +1,40 @@
 import torch
-from src.vision.vit import ViT
+import unittest
+import sys
+import os
 
-def test_vit_forward_shape():
-    # Setup a dummy model configuration
-    model = ViT(
-        image_size=28,
-        patch_size=7,
-        num_classes=10,
-        dim=64,
-        depth=6,
-        heads=8,
-        mlp_dim=128,
-        channels=1
-    )
-    
-    # Create dummy image tensor: [batch_size, channels, height, width]
-    img = torch.randn(2, 1, 28, 28)
-    
-    # Expected output: [batch_size, num_classes]
-    # out = model(img)
-    # assert out.shape == (2, 10)
-    pass
+# Ensure the root directory is in the path for imports
+sys.path.append(os.getcwd())
+from src.vision.vit.vit import VisionTransformer
+
+class TestVisionTransformer(unittest.TestCase):
+    def test_forward_pass_cifar(self):
+        # Configuration for CIFAR-10 like images
+        img_size = 32
+        patch_size = 4
+        in_channels = 3
+        num_classes = 10
+        batch_size = 2
+        
+        model = VisionTransformer(
+            img_size=img_size,
+            in_channels=in_channels,
+            patch_size=patch_size,
+            num_classes=num_classes,
+            emb_dim=64, # Small for testing
+            depth=2,
+            num_heads=2
+        )
+        
+        # Dummy input batch
+        x = torch.randn(batch_size, in_channels, img_size, img_size)
+        
+        # Forward pass
+        out = model(x)
+        
+        # Check output shape
+        self.assertEqual(out.shape, (batch_size, num_classes))
+        print("Test passed: Forward pass outputs correct shape.")
+
+if __name__ == '__main__':
+    unittest.main()
