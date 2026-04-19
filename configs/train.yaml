@@ -10,7 +10,9 @@ hydra:
     chdir: True
 
 training:
-  epochs: 100
+  model_name: "vit"  # vit | simple_vit
+  augmentation: "basic"  # basic | randaugment
+  epochs: 300
   batch_size: 64
   learning_rate: 3e-4
   weight_decay: 1e-4

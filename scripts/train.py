@@ -4,8 +4,10 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.tensorboard import SummaryWriter
-from src.vision.vit.vit import VisionTransformer
+from src.vision.vit.vit import VisionTransformer, SimpleViT
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import hydra
 from omegaconf import DictConfig
 
@@ -42,12 +44,21 @@ def main(cfg: DictConfig):
     std = list(cfg.dataset.std)
 
     # Data Augmentation and Normalization for training
-    transform_train = transforms.Compose([
-        transforms.RandomCrop(img_size, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
+    if cfg.training.augmentation == "randaugment":
+        transform_train = transforms.Compose([
+            transforms.RandomResizedCrop(img_size, scale=(0.08, 1.0)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandAugment(num_ops=2, magnitude=9),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
+    else:
+        transform_train = transforms.Compose([
+            transforms.RandomCrop(img_size, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
 
     # Normalization for testing
     transform_test = transforms.Compose([
@@ -68,22 +79,40 @@ def main(cfg: DictConfig):
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    print("Initializing Vision Transformer...")
-    model = VisionTransformer(
-        img_size=img_size,
-        in_channels=in_channels,
-        patch_size=patch_size,
-        num_classes=num_classes,
-        emb_dim=emb_dim,
-        depth=depth,
-        num_heads=num_heads,
-        mlp_ratio=mlp_ratio,
-        dropout=dropout
-    ).to(device)
+    print(f"Initializing {cfg.training.model_name}...")
+    if cfg.training.model_name == "simple_vit":
+        model = SimpleViT(
+            img_size=img_size,
+            in_channels=in_channels,
+            patch_size=patch_size,
+            num_classes=num_classes,
+            emb_dim=emb_dim,
+            depth=depth,
+            num_heads=num_heads,
+            mlp_ratio=mlp_ratio,
+            dropout=dropout,
+            qk_norm=cfg.model.qk_norm
+        ).to(device)
+    else:
+        model = VisionTransformer(
+            img_size=img_size,
+            in_channels=in_channels,
+            patch_size=patch_size,
+            num_classes=num_classes,
+            emb_dim=emb_dim,
+            depth=depth,
+            num_heads=num_heads,
+            mlp_ratio=mlp_ratio,
+            dropout=dropout
+        ).to(device)
+
+    # Linear LR scaling rule
+    scaled_lr = learning_rate * (batch_size / 256)
+    print(f"Base LR: {learning_rate:.2e} | Scaled LR: {scaled_lr:.2e} (batch size: {batch_size})")
 
     # Loss and Optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = optim.AdamW(model.parameters(), lr=scaled_lr, weight_decay=weight_decay)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     # TensorBoard writer
@@ -97,6 +126,8 @@ def main(cfg: DictConfig):
         running_loss = 0.0
         correct = 0
         total = 0
+        interval_correct = 0
+        interval_total = 0
 
         for i, data in enumerate(trainloader, 0):
             inputs, labels = data
@@ -111,21 +142,28 @@ def main(cfg: DictConfig):
 
             running_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            
+            batch_total = labels.size(0)
+            batch_correct = (predicted == labels).sum().item()
+            
+            total += batch_total
+            correct += batch_correct
+            
+            interval_total += batch_total
+            interval_correct += batch_correct
 
             global_step += 1
             if i % log_interval == log_interval - 1:
                 avg_loss = running_loss / log_interval
                 # Per-interval accuracy: how well the model did on just these batches
-                interval_acc = 100 * correct / total
+                interval_acc = 100 * interval_correct / interval_total
                 print(f"[Epoch {epoch + 1}, Batch {i + 1:3d}] loss: {avg_loss:.3f} | acc: {interval_acc:.2f}%")
                 writer.add_scalar("train/loss", avg_loss, global_step)
                 writer.add_scalar("train/acc", interval_acc, global_step)
                 running_loss = 0.0
                 # Reset per-interval counters so acc reflects only the current window
-                correct = 0
-                total = 0
+                interval_correct = 0
+                interval_total = 0
 
         scheduler.step()
 

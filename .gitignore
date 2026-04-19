@@ -2,8 +2,10 @@
 data/
 
 # Experiment outputs (logs, checkpoints, hydra configs)
-experiments/
-outputs/
+/experiments/
+/outputs/
+/checkpoints/
+/tensorboard/
 
 # Python
 __pycache__/

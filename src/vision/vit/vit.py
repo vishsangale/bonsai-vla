@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+from .attention import MultiheadSelfAttention
+from .pos_encoding import sinusoidal_2d_pos_encoding
 
 class PatchEmbedding(nn.Module):
     """
@@ -137,5 +139,129 @@ class VisionTransformer(nn.Module):
         
         # 6. Classification Head
         out = self.head(cls_token_final)
+        
+        return out
+
+class SimpleTransformerEncoderLayer(nn.Module):
+    """
+    A modernized Vision Transformer encoder block using custom attention.
+    """
+    def __init__(self, emb_dim=192, num_heads=3, mlp_ratio=4.0, dropout=0.0, qk_norm=True):
+        super().__init__()
+        self.ln_1 = nn.LayerNorm(emb_dim)
+        self.attn = MultiheadSelfAttention(emb_dim=emb_dim, num_heads=num_heads, dropout=dropout, qk_norm=qk_norm)
+        
+        self.ln_2 = nn.LayerNorm(emb_dim)
+        hidden_dim = int(emb_dim * mlp_ratio)
+        self.mlp = nn.Sequential(
+            nn.Linear(emb_dim, hidden_dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, emb_dim),
+            nn.Dropout(dropout)
+        )
+
+    def forward(self, x):
+        # 1. LayerNorm + Self-Attention + Residual
+        x_ln1 = self.ln_1(x)
+        attn_out, _ = self.attn(x_ln1)
+        x = x + attn_out
+        
+        # 2. LayerNorm + MLP + Residual
+        x_ln2 = self.ln_2(x)
+        mlp_out = self.mlp(x_ln2)
+        x = x + mlp_out
+        
+        return x
+
+class SimpleViT(nn.Module):
+    """
+    A modernized Vision Transformer architecture (SimpleViT).
+    Features:
+    - Fixed 2D sinusoidal positional encoding.
+    - Global Average Pooling (GAP) instead of CLS token.
+    - QK-normalized attention.
+    - No dropout by default.
+    """
+    def __init__(self, 
+                 img_size=32, 
+                 in_channels=3, 
+                 patch_size=4, 
+                 num_classes=10,
+                 emb_dim=192, 
+                 depth=12, 
+                 num_heads=3, 
+                 mlp_ratio=4.0, 
+                 dropout=0.0,
+                 qk_norm=True):
+        super().__init__()
+        
+        # Calculate grid size
+        assert img_size % patch_size == 0, "Image size must be divisible by patch size."
+        grid_size = img_size // patch_size
+        
+        self.patch_embed = PatchEmbedding(in_channels=in_channels, patch_size=patch_size, emb_dim=emb_dim)
+        
+        # Fixed 2D sinusoidal positional encoding (no pos_embed parameter)
+        self.pos_encoding = sinusoidal_2d_pos_encoding(grid_size, grid_size, emb_dim)
+        
+        # Transformer Encoder
+        self.blocks = nn.ModuleList([
+            SimpleTransformerEncoderLayer(
+                emb_dim=emb_dim, 
+                num_heads=num_heads, 
+                mlp_ratio=mlp_ratio, 
+                dropout=dropout,
+                qk_norm=qk_norm
+            )
+            for _ in range(depth)
+        ])
+        
+        # Final LayerNorm
+        self.norm = nn.LayerNorm(emb_dim)
+        
+        # Classification head
+        self.head = nn.Linear(emb_dim, num_classes)
+        
+        # Initialize weights
+        self._init_weights()
+
+    def _init_weights(self):
+        self.apply(self._init_module_weights)
+        
+    def _init_module_weights(self, m):
+        if isinstance(m, nn.Linear):
+            nn.init.trunc_normal_(m.weight, std=.02)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.LayerNorm):
+            nn.init.constant_(m.bias, 0)
+            nn.init.constant_(m.weight, 1.0)
+
+    def forward(self, x):
+        B = x.shape[0]
+        
+        # 1. Patch extraction and embedding
+        x = self.patch_embed(x) # (B, num_patches, emb_dim)
+        
+        # 2. Add fixed positional encoding
+        # Ensure pos_encoding is on the same device as x
+        if self.pos_encoding.device != x.device:
+            self.pos_encoding = self.pos_encoding.to(x.device)
+        
+        x = x + self.pos_encoding # (B, num_patches, emb_dim)
+        
+        # 3. Transformer Encoder
+        for block in self.blocks:
+            x = block(x)
+            
+        # 4. Output processing
+        x = self.norm(x)
+        
+        # 5. Global Average Pooling (GAP)
+        x = x.mean(dim=1) # (B, emb_dim)
+        
+        # 6. Classification Head
+        out = self.head(x)
         
         return out

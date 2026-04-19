@@ -1,0 +1,11 @@
+name: "simple_vit"
+patch_size: 4
+num_classes: 10
+dim: 192
+depth: 12
+heads: 3
+mlp_dim: 768
+channels: 3
+dropout: 0.0
+pool: gap        # gap | cls
+qk_norm: true

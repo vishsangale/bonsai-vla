@@ -1,0 +1,7 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/TransformerBlockScene/1584795214_1769481583_3312049403.mp4'
+file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/TransformerBlockScene/4072820271_2320511881_594686732.mp4'
+file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/TransformerBlockScene/4072820271_1913494141_486476076.mp4'
+file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/TransformerBlockScene/4072820271_3594009782_2513770306.mp4'
+file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/TransformerBlockScene/4072820271_3080192980_3507200579.mp4'
+file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/TransformerBlockScene/4072820271_2552855209_3955224572.mp4'
