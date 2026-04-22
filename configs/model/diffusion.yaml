@@ -1,0 +1,9 @@
+name: "diffusion_unet"
+dim: 64
+init_dim: 64
+out_dim: 3
+dim_mults: [1, 2, 4, 8]
+channels: 3
+resnet_block_groups: 8
+attn_heads: 4
+attn_dim_head: 32
