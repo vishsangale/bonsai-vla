@@ -1,7 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/ArchitectureOverview/1584795214_678033873_1542135939.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/ArchitectureOverview/4072820271_867231078_3752424554.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/ArchitectureOverview/4072820271_1978432339_2708419660.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/ArchitectureOverview/4072820271_1913335067_627143050.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/ArchitectureOverview/4072820271_4132692502_3542119644.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/ArchitectureOverview/4072820271_1038707267_3726110455.mp4'

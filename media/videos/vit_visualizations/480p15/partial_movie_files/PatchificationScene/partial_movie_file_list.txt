@@ -1,9 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/1584795214_54865447_223132457.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/4072820271_2834709167_3721190601.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/4072820271_3177672948_1330098579.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/4072820271_2834709167_1593454307.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/4072820271_285251139_2920418410.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/4072820271_2834709167_3003447990.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/4072820271_2789643727_1839331133.mp4'
-file 'file:/home/vishsangale/workspace/bonsai-vla/media/videos/vit_visualizations/480p15/partial_movie_files/PatchificationScene/4072820271_2552855209_1472249959.mp4'

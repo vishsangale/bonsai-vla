@@ -6,6 +6,7 @@ data/
 /outputs/
 /checkpoints/
 /tensorboard/
+/media/
 
 # Python
 __pycache__/
