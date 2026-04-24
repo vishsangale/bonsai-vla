@@ -6,17 +6,19 @@ To develop a deep understanding of the mechanics, it is highly recommended to im
 
 Below is a structured roadmap detailing the theoretical concepts and the corresponding seminal papers for each step:
 
-## Phase 1: The Vision Transformer (ViT)
+## Phase 1: The Vision Transformer (ViT) [x]
 Understanding how modern models process visual information is the first step. The Vision Transformer serves as the visual backbone for the majority of modern VLMs and VLAs.
 
+- **Status:** **COMPLETE**. Baseline ViT implemented and verified on CIFAR-10.
 - **The Concept:** An image is divided into fixed-size patches (e.g., 16x16). These patches are linearly embedded and processed through a standard Transformer encoder, analogous to how text tokens are processed.
 - **Foundational Paper:** "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale"
 - **Reference:** [arXiv:2010.11929](https://arxiv.org/abs/2010.11929)
 - **Exercise:** Implement a basic Vision Transformer architecture and train it on a foundational dataset such as CIFAR-10 or MNIST.
 
-## Phase 2: Generative Vision (Diffusion)
+## Phase 2: Generative Vision (Diffusion) [x]
 Understanding the generative aspects of vision models involves architectures distinct from ViT, commonly utilizing U-Nets with Cross-Attention mechanisms.
 
+- **Status:** **COMPLETE**. DDPM implemented from scratch with noise-conditioned U-Net. Successfully trained for 100 epochs on CIFAR-10.
 - **The Concept:** Denoising Diffusion Probabilistic Models (DDPM). This involves training a model to iteratively denoise an image, effectively learning the data distribution to generate novel images from Gaussian noise.
 - **Foundational Paper:** "Denoising Diffusion Probabilistic Models"
 - **Reference:** [arXiv:2006.11239](https://arxiv.org/abs/2006.11239)

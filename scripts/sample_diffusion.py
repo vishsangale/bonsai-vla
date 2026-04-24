@@ -43,8 +43,16 @@ def main(cfg: DictConfig):
     if not checkpoints:
         print(f"No checkpoints found in {checkpoint_dir}")
         return
-    
-    latest_checkpoint = sorted(checkpoints)[-1]
+
+    # Sort checkpoints by epoch number correctly (natural sorting)
+    def get_epoch(filename):
+        try:
+            return int(filename.split('_')[-1].split('.')[0])
+        except (ValueError, IndexError):
+            return -1
+            
+    checkpoints = sorted(checkpoints, key=get_epoch)
+    latest_checkpoint = checkpoints[-1]
     checkpoint_path = os.path.join(checkpoint_dir, latest_checkpoint)
     print(f"Loading checkpoint: {checkpoint_path}")
     diffusion.load_state_dict(torch.load(checkpoint_path, map_location=device))
